@@ -44,10 +44,10 @@
             <div id="dc-count-line" style="font-size: 24px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <span><span id="dc-count">0</span> ${svgIcon}</span>
             </div>
-            <div id="dc-dust-line" style="margin-bottom: 4px; color: #ccc;">
+            <div id="dc-dust-line" style="margin-bottom: 4px; color: #ccc; font-size: 16px;">
                 Этого хватит на <b id="dc-dust">0</b> пыли.
             </div>
-            <div id="dc-until-line" style="margin-bottom: 8px; color: #aaa; font-size: 12px; display: none;"></div>
+            <div id="dc-until-line" style="margin-bottom: 8px; color: #aaa; font-size: 14px; display: none;"></div>
             <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
                 <span>Цель:</span>
                 <input type="number" id="dc-goal-input" value="${targetDust > 0 ? targetDust : ''}" min="0" placeholder="0" style="width: 65px; background: #383838; color: #fff; border: none; padding: 2px 4px; border-radius: 3px; font-size: 14px; text-align: center;">
