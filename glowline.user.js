@@ -31,21 +31,27 @@ function ui() {
     let nav = document.querySelector('.game-topbar-nav');
     if (!nav) return;
 
+    let p1 = 'M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z';
+    let p2 = 'M12 17.5C8.2 17.5 4.8 15.4 3.2 12H1C2.7 16.4 7 19.5 12 19.5S21.3 16.4 23 12H20.8C19.2 15.4 15.8 17.5 12 17.5Z';
+
     let row = (txt, k) => `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <span style="cursor:pointer; font-size:14px; color:${c.s[k] ? '#888' : '#f44'};" id="gl-x${k}" title="Вкл/Выкл">✖</span>
+            <span style="cursor:pointer; display:flex; align-items:center; color:${c.s[k] ? '#888' : '#555'};" id="gl-x${k}" title="Видимость">
+                <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:currentColor; pointer-events:none;"><path d="${c.s[k] ? p1 : p2}"/></svg>
+            </span>
             <span style="flex-grow:1; margin-left:6px; opacity:${c.s[k] ? 1 : 0.4};" id="gl-tx${k}">${txt}</span>
             <input type="color" id="gl-c${k}" value="${c.c[k] || toH(c.o[k])}">
         </div>`;
 
     let html = `
-        <span style="position:relative; display:flex;">
-            <a href="#" id="gl-btn" class="kti-topbar-btn" style="margin-left:5px; text-decoration:none;"><span>Glowline</span></a>
-            <div id="gl-m" style="display:none; position:absolute; top:100%; left:0; width:220px; background:#2b2b2b; color:#fff; padding:10px; border-radius:6px; border:1px solid #444; z-index:10000; box-shadow:0 4px 8px rgba(0,0,0,.3); font-size:12px;">
+        <span style="position:relative; display:flex; align-items:center;">
+            <a href="#" id="gl-btn" class="kti-topbar-btn" style="margin-left:5px; text-decoration:none; color:inherit; display:flex; align-items:center;"><span>Glowline</span></a>
+            <div id="gl-m" style="display:none; position:absolute; top:100%; left:0; width:220px; background:#2b2b2b; color:#fff; padding:10px; border-radius:6px; z-index:10000; box-shadow:0 4px 8px rgba(0,0,0,.3); font-size:12px;">
                 <label><input type="checkbox" id="gl-on" ${c.on ? 'checked' : ''}> <b>Выделять</b></label><br><br>
                 ${row('"В игре"', 1)}
                 ${row('"Недавно"', 2)}
-                ${row('"Спит"', 3)}<br>
+                ${row('"Спит"', 3)}
+                <button id="gl-res" style="width:100%; margin:4px 0 8px; background:#383838; color:#ccc; border:none; padding:2px 4px; font-size:11px; border-radius:2px; cursor:pointer;">Сбросить цвета</button>
                 Прозрачность: <span id="gl-op-v">${c.op}%</span>
                 <input type="range" id="gl-op" min="0" max="100" value="${c.op}" style="width:100%; margin-bottom:10px;">
                 <label><input type="radio" name="gl-t" value="cat" ${c.t === 'cat' ? 'checked' : ''}> Под игроком</label><br>
@@ -76,10 +82,20 @@ function ui() {
     };
 
     m.onclick = e => {
-        if (e.target.id.startsWith('gl-x')) {
+        if (e.target.id === 'gl-res') {
+            if (confirm("Точно сбросить цвета? Текущие цвета не сохранятся")) {
+                [1, 2, 3].forEach(k => {
+                    c.c[k] = '';
+                    let inp = document.getElementById(`gl-c${k}`);
+                    if (inp && c.o[k]) inp.value = toH(c.o[k]);
+                });
+                save();
+            }
+        } else if (e.target.id.startsWith('gl-x')) {
             let k = e.target.id[4];
             c.s[k] = c.s[k] ? 0 : 1;
-            e.target.style.color = c.s[k] ? '#888' : '#f44';
+            e.target.style.color = c.s[k] ? '#888' : '#555';
+            e.target.innerHTML = `<svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:currentColor; pointer-events:none;"><path d="${c.s[k] ? p1 : p2}"/></svg>`;
             document.getElementById(`gl-tx${k}`).style.opacity = c.s[k] ? 1 : 0.4;
             save();
         }
@@ -135,8 +151,8 @@ function apply() {
 ui();
 apply();
 
-let t;
+let raf;
 new MutationObserver(() => {
-    clearTimeout(t);
-    t = setTimeout(apply, 50);
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(apply);
 }).observe(document.body, { childList: true, subtree: true, characterData: true });
